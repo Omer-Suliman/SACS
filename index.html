@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SACS — Student Affairs Coordination System</title>
+    <link rel="stylesheet" href="css/output.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+</head>
+
+<body class="h-full bg-gray-50 flex flex-col min-h-screen">
+
+    <custom-navbar></custom-navbar>
+
+    <!-- Toast notification container for success and error messages -->
+    <div id="toastContainer"></div>    <section id="auth" class="auth-fullscreen">
+
+        <!-- Brand panel -->
+        <div class="auth-brand">
+            <div class="auth-brand-content">
+                <p class="auth-institution-label">ALTINBAŞ ÜNİVERSİTESİ</p>
+                <h2 class="auth-headline">Student Affairs,<br>coordinated.</h2>
+                <p class="auth-brand-desc">A single place for office-hour appointments, student activities, club life, and the points &amp; rewards that recognise participation.</p>
+            </div>
+        </div>
+
+        <!-- Form panel -->
+        <div class="auth-form-panel">
+            <div class="auth-form-inner">
+
+                <!-- Login -->
+                <div id="loginContainer" class="auth-view">
+                    <h2 class="auth-view-heading">Welcome back</h2>
+                    <p class="auth-view-sub">Sign in with your university email.</p>
+
+                    <form id="loginForm" class="auth-form">
+                        <div id="loginError" class="hidden auth-error"></div>
+
+                        <div class="auth-field">
+                            <label for="username">Email</label>
+                            <input id="username" placeholder="e.g. user@domain.com" required />
+                        </div>
+                        <div class="auth-field">
+                            <label for="password">Password</label>
+                            <input id="password" type="password" placeholder="••••••••" required />
+                        </div>
+                        <button class="auth-btn" type="submit">Sign in</button>
+                    </form>
+
+                    <div class="auth-links">
+                        <p>Don't have an account? <a id="showSignup" href="#">Create one</a></p>
+                        <p>Forgot password? <a id="showForgot" href="#">Reset it</a></p>
+                    </div>
+                </div>
+
+                <!-- Sign up -->
+                <div id="signupContainer" class="hidden auth-view">
+                    <h2 class="auth-view-heading">Create Account</h2>
+                    <p class="auth-view-sub">Join the coordination system.</p>
+
+                    <form id="signupForm" class="auth-form">
+                        <div class="auth-field">
+                            <label for="signupName">Full Name</label>
+                            <input id="signupName" placeholder="e.g. Jane Doe" required />
+                        </div>
+                        <div class="auth-field">
+                            <label for="signupEmail">Email</label>
+                            <input id="signupEmail" type="email" placeholder="e.g. jane@domain.com" required />
+                        </div>
+                        <div class="auth-field">
+                            <label for="signupPassword">Password</label>
+                            <input id="signupPassword" type="password" placeholder="••••••••" required />
+                        </div>
+                        <div class="auth-field">
+                            <label for="signupConfirm">Confirm Password</label>
+                            <input id="signupConfirm" type="password" placeholder="••••••••" required />
+                        </div>
+                        <button class="auth-btn" type="submit">Sign Up</button>
+                    </form>
+
+                    <div class="auth-links">
+                        <p>Already have an account? <a id="backToLogin" href="#">Sign in</a></p>
+                    </div>
+                </div>
+
+                <!-- Forgot password -->
+                <div id="forgotContainer" class="hidden auth-view">
+                    <h2 class="auth-view-heading">Reset Password</h2>
+                    <p class="auth-view-sub">Enter your email to receive reset instructions.</p>
+
+                    <form id="forgotForm" class="auth-form">
+                        <div class="auth-field">
+                            <label for="forgotEmail">Email</label>
+                            <input id="forgotEmail" type="email" placeholder="e.g. user@domain.com" required />
+                        </div>
+                        <button class="auth-btn" type="submit">Reset Password</button>
+                    </form>
+
+                    <div class="auth-links">
+                        <p><a id="backToLogin2" href="#">← Back to Sign in</a></p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </section>
+
+    <main id="app" class="hidden max-w-7xl mx-auto px-6 py-8 flex-grow w-full">
+
+        <section data-page="dashboard" class="space-y-6">
+            <div class="page-header">
+                <div>
+                    <h2>Dashboard</h2>
+                    <p class="page-sub">Your activity summary at a glance</p>
+                </div>
+            </div>
+            <div id="dashCards" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5"></div>
+        </section>
+
+        <section data-page="advising" class="hidden space-y-6">
+            <div class="page-header">
+                <div>
+                    <h2>Advising</h2>
+                    <p class="page-sub">Book office hours with academic staff</p>
+                </div>
+                <div id="advManageWrap" class="hidden">
+                    <button class="btn primary flex items-center gap-2" id="btnAddSlot">
+                        <i data-feather="plus" class="w-4 h-4"></i> Publish Slot
+                    </button>
+                </div>
+            </div>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="section-heading">Available Slots</h3>
+                    <div id="slotList" class="space-y-3"></div>
+                </div>
+                <div>
+                    <h3 class="section-heading">My Bookings</h3>
+                    <div id="myBookings" class="space-y-3"></div>
+                </div>
+            </div>
+        </section>
+
+        <section data-page="queue" class="hidden space-y-6">
+            <div class="page-header">
+                <div>
+                    <h2>Appointments</h2>
+                    <p class="page-sub">Book or manage advising office hours</p>
+                </div>
+                <div id="queueManageWrap" class="hidden">
+                    <button class="btn primary flex items-center gap-2" id="btnCreateSlot">
+                        <i data-feather="plus" class="w-4 h-4"></i> Publish Office Time
+                    </button>
+                </div>
+            </div>
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Left: Student view - Book Appointment -->
+                <div>
+                    <h3 class="section-heading">
+                        <i data-feather="calendar" class="w-4 h-4 text-info"></i>
+                        Available Appointments
+                    </h3>
+                    <div id="appointmentSlotsList" class="space-y-3"></div>
+                </div>
+
+                <!-- Right: Doctor/Staff view - My Published Slots -->
+                <div>
+                    <h3 class="section-heading">
+                        <i data-feather="clock" class="w-4 h-4 text-accent"></i>
+                        My Published Slots
+                    </h3>
+                    <div id="mySlotsList" class="space-y-3 mb-5"></div>
+
+                    <!-- Publish form, visible only for DOCTOR/STAFF/ADMIN -->
+                    <form id="createSlotForm" class="form-section space-y-4 hidden">
+                        <p class="form-section-title">
+                            <i data-feather="plus-circle" class="w-4 h-4"></i>
+                            Publish Office Hours
+                        </p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label>Date</label>
+                                <input type="date" id="slotDate" required />
+                            </div>
+                            <div>
+                                <label>Office / Room</label>
+                                <input type="text" id="slotOffice" placeholder="e.g. Room 101" required />
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label>Start Time</label>
+                                <input type="time" id="slotStartTime" required />
+                            </div>
+                            <div>
+                                <label>End Time</label>
+                                <input type="time" id="slotEndTime" required />
+                            </div>
+                        </div>
+                        <div>
+                            <label>Capacity (students)</label>
+                            <input type="number" id="slotCapacity" min="1" value="5" required />
+                        </div>
+                        <button class="btn primary w-full" type="submit">
+                            <i data-feather="send" class="w-4 h-4"></i>
+                            Publish Office Time
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <section data-page="activities" class="hidden space-y-6">
+            <div class="page-header">
+                <div>
+                    <h2>Activities & Points</h2>
+                    <p class="page-sub">Workshops, sports events, and campus activities</p>
+                </div>
+            </div>
+
+            <!-- Staff Controls -->
+            <div id="staffActControls" class="hidden space-y-5 pb-6 border-b border-dashed" style="border-color: var(--border);">
+                <div class="panel-indigo">
+                    <p class="panel-title">
+                        <i data-feather="plus-circle" class="w-4 h-4" style="color: var(--info);"></i>
+                        Create New Activity
+                    </p>
+                    <form id="createActForm" class="grid md:grid-cols-2 gap-4">
+                        <input id="newActTitle" placeholder="Activity Title" required />
+                        <select id="newActType">
+                            <option value="WORKSHOP">Workshop</option>
+                            <option value="SPORT">Sport</option>
+                            <option value="GENERAL">General</option>
+                        </select>
+                        <input id="newActStart" type="datetime-local" required />
+                        <input id="newActEnd" type="datetime-local" required />
+                        <input id="newActLoc" placeholder="Location" required />
+                        <input id="newActCap" type="number" placeholder="Capacity" min="1" value="50" required />
+                        <input id="newActPoints" type="number" placeholder="Points reward" min="0" value="10" required />
+                        <textarea id="newActDesc" class="md:col-span-2" placeholder="Short description…" rows="2"></textarea>
+                        <button type="submit" class="btn primary md:col-span-2">
+                            <i data-feather="send" class="w-4 h-4"></i> Create Activity
+                        </button>
+                    </form>
+                </div>
+
+                <div class="panel-green">
+                    <p class="panel-title">
+                        <i data-feather="check-circle" class="w-4 h-4" style="color: var(--success);"></i>
+                        Mark Attendance
+                    </p>
+                    <div class="flex gap-3 flex-wrap">
+                        <select id="attendActSelect" class="flex-1 min-w-40"></select>
+                        <input id="attendStudentEmail" class="flex-1 min-w-40" placeholder="Student email address" />
+                        <button type="button" id="btnMarkAttend" class="btn success whitespace-nowrap">
+                            <i data-feather="user-check" class="w-4 h-4"></i> Mark Present
+                        </button>
+                    </div>
+                    <div id="attendanceMsg" class="mt-2 text-sm font-semibold"></div>
+                    <div class="mt-4">
+                        <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color: var(--text-muted);">Recent Attendance</p>
+                        <div id="attendanceList" class="space-y-1 text-sm"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="section-heading">
+                        <i data-feather="activity" class="w-4 h-4 text-info"></i>
+                        Activities Catalog
+                    </h3>
+                    <div id="actCatalog" class="space-y-3"></div>
+                </div>
+                <div>
+                    <h3 class="section-heading">
+                        <i data-feather="bookmark" class="w-4 h-4 text-accent"></i>
+                        My Registrations
+                    </h3>
+                    <div id="myRegs" class="space-y-3"></div>
+                </div>
+            </div>
+        </section>
+
+        <section data-page="clubs" class="hidden space-y-6">
+            <div id="clubsListView" class="space-y-7">
+                <div class="page-header">
+                    <div>
+                        <h2>Clubs & Organizations</h2>
+                        <p class="page-sub">Discover, join, and manage student clubs</p>
+                    </div>
+                    <button id="btnShowCreateClub" class="hidden btn primary flex items-center gap-2">
+                        <i data-feather="plus" class="w-4 h-4"></i> Create Club
+                    </button>
+                </div>
+
+                <div id="clubCreateWrap" class="hidden form-section transition-all">
+                    <p class="form-section-title">
+                        <i data-feather="users" class="w-4 h-4"></i>
+                        Start a New Club
+                    </p>
+                    <form id="createClubForm" class="grid gap-4 md:grid-cols-2">
+                        <input id="clubName" placeholder="Club Name" required />
+                        <input id="clubLoc" placeholder="Meeting Location" required />
+                        <input id="clubDays" placeholder="Meeting Days (e.g. Mon, Wed)" required />
+                        <input id="clubTime" placeholder="Meeting Time (e.g. 14:00)" required />
+                        <textarea id="clubDesc" class="md:col-span-2" placeholder="Describe your club…" rows="3" required></textarea>
+                        <div class="md:col-span-2 flex justify-end gap-2">
+                            <button type="submit" class="btn primary">
+                                <i data-feather="send" class="w-4 h-4"></i> Submit for Approval
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="space-y-3">
+                    <h3 class="section-heading">
+                        My Clubs
+                        <span id="myClubsCount" class="count-pill">0</span>
+                    </h3>
+                    <div id="clubListMy" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </div>
+
+                <hr class="divider" />
+
+                <div class="space-y-3">
+                    <h3 class="section-heading">
+                        All Clubs
+                        <span id="allClubsCount" class="count-pill" style="background: var(--bg-subtle); color: var(--navy); border: 1px solid var(--border);">0</span>
+                    </h3>
+                    <div id="clubListApproved" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </div>
+            </div>
+
+            <div id="clubDetailView" class="hidden space-y-5 animate-fade-in">
+                <div class="card" style="padding: 1.75rem;">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5">
+                        <div>
+                            <div class="flex items-center gap-3 flex-wrap">
+                                <h2 id="clubDetailName" style="margin:0;">Club Name</h2>
+                                <span id="clubDetailStatus"></span>
+                            </div>
+                            <p id="clubDetailCreatedBy" class="text-sm mt-1" style="color: var(--text-muted);">Created by …</p>
+                        </div>
+                        <div id="clubDetailActions" class="flex gap-2 flex-wrap"></div>
+                    </div>
+                    <div id="clubTabNav" class="flex gap-1 border-b overflow-x-auto no-scrollbar" style="border-color: var(--border);">
+                        <button class="tab-btn active" data-tab="overview">
+                            <i data-feather="info" class="w-3.5 h-3.5"></i> Overview
+                        </button>
+                        <button class="tab-btn" data-tab="events">
+                            <i data-feather="calendar" class="w-3.5 h-3.5"></i> Events
+                        </button>
+                        <button class="tab-btn" data-tab="posts">
+                            <i data-feather="file-text" class="w-3.5 h-3.5"></i> Posts
+                        </button>
+                        <button class="tab-btn" data-tab="members">
+                            <i data-feather="users" class="w-3.5 h-3.5"></i> Members
+                        </button>
+                        <button class="tab-btn" data-tab="about">
+                            <i data-feather="map-pin" class="w-3.5 h-3.5"></i> About
+                        </button>
+                    </div>
+                    <div id="clubTabContent" class="mt-6 min-h-[200px]"></div>
+                </div>
+                <button onclick="renderClubs()" class="btn ghost flex items-center gap-2">
+                    <i data-feather="arrow-left" class="w-4 h-4"></i> Back to All Clubs
+                </button>
+            </div>
+        </section>
+
+        <section data-page="rewards" class="hidden space-y-6">
+            <div class="page-header">
+                <div>
+                    <h2>Rewards & Wallet</h2>
+                    <p class="page-sub">Redeem your CampusCoin points for exclusive rewards</p>
+                </div>
+            </div>
+            <div class="grid md:grid-cols-2 gap-7">
+                <div class="space-y-5">
+                    <div id="wallet"></div>
+                    <h3 class="section-heading">
+                        <i data-feather="gift" class="w-4 h-4 text-accent"></i>
+                        Rewards Catalog
+                    </h3>
+                    <div id="rewardsList" class="space-y-3"></div>
+                </div>
+                <div>
+                    <h3 class="section-heading">
+                        <i data-feather="tag" class="w-4 h-4 text-info"></i>
+                        My Vouchers
+                    </h3>
+                    <div id="voucherList" class="space-y-3"></div>
+                </div>
+            </div>
+        </section>
+
+        <section data-page="admin" class="hidden space-y-6">
+            <div class="page-header">
+                <div>
+                    <h2>Admin Panel</h2>
+                    <p class="page-sub">System management — users, clubs, rewards, and partners</p>
+                </div>
+            </div>
+
+            <!-- User Management -->
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <div class="flex items-center justify-between px-6 py-4" style="border-bottom: 1px solid var(--border);">
+                    <h3 class="section-heading" style="margin: 0;">
+                        <i data-feather="users" class="w-4 h-4" style="color: var(--info);"></i>
+                        User Management
+                    </h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="data-table w-full">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminUserTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pending Clubs -->
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <div class="flex items-center justify-between px-6 py-4" style="border-bottom: 1px solid var(--border);">
+                    <h3 class="section-heading" style="margin: 0;">
+                        <i data-feather="clock" class="w-4 h-4" style="color: var(--warn);"></i>
+                        Pending Club Approvals
+                    </h3>
+                </div>
+                <div id="adminPendingClubs" class="space-y-3 p-5"></div>
+            </div>
+
+            <!-- Rewards & Partners -->
+            <div id="adminRewards" class="grid md:grid-cols-2 gap-6">
+                <!-- Rewards Management -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div class="px-6 py-4" style="border-bottom: 1px solid var(--border);">
+                        <h3 class="section-heading" style="margin: 0;">
+                            <i data-feather="gift" class="w-4 h-4" style="color: var(--accent);"></i>
+                            Rewards
+                        </h3>
+                    </div>
+                    <div class="p-5 space-y-4">
+                        <form id="rewardForm" class="grid md:grid-cols-2 gap-3">
+                            <input id="rewardName" placeholder="Reward Name" required />
+                            <select id="rewardType">
+                                <option value="PERCENT">Percent (%)</option>
+                                <option value="AMOUNT">Amount (₺)</option>
+                                <option value="ITEM">Item</option>
+                            </select>
+                            <input id="rewardValue" type="number" placeholder="Value" min="0" />
+                            <input id="rewardCost" type="number" placeholder="Cost Points" min="0" />
+                            <input id="rewardMinSpend" type="number" placeholder="Min Spend (optional)" min="0" />
+                            <input id="rewardValidDays" type="number" placeholder="Valid Days" min="1" />
+                            <input id="rewardStock" type="number" placeholder="Stock Quantity" min="1" />
+                            <select id="rewardPartner"></select>
+                            <div class="md:col-span-2 flex gap-2">
+                                <button type="button" id="submitRewardBtn" class="btn primary flex-1" onclick="window.submitReward()">
+                                    <i data-feather="check" class="w-4 h-4 hidden" id="submitRewardIconEdit"></i>
+                                    <i data-feather="plus" class="w-4 h-4" id="submitRewardIconAdd"></i> 
+                                    <span id="submitRewardText">Add Reward</span>
+                                </button>
+                                <button type="button" id="cancelEditRewardBtn" class="btn ghost hidden" onclick="window.cancelEditReward()">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                        <div id="adminRewardsList" class="space-y-2"></div>
+                    </div>
+                </div>
+
+                <!-- Partners Management -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div class="px-6 py-4" style="border-bottom: 1px solid var(--border);">
+                        <h3 class="section-heading" style="margin: 0;">
+                            <i data-feather="briefcase" class="w-4 h-4" style="color: var(--accent);"></i>
+                            Partners
+                        </h3>
+                    </div>
+                    <div class="p-5 space-y-4">
+                        <form id="partnerForm" class="flex gap-3">
+                            <input id="partnerName" class="flex-1" placeholder="Partner Name" required />
+                            <button type="button" class="btn primary whitespace-nowrap" onclick="window.addPartner()">
+                                <i data-feather="plus" class="w-4 h-4"></i> Add
+                            </button>
+                        </form>
+                        <div id="adminPartnersList" class="space-y-2"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section data-page="partner" class="hidden space-y-6">
+            <div class="page-header">
+                <div>
+                    <h2>Partner Portal</h2>
+                    <p class="page-sub">Verify and redeem student voucher codes</p>
+                </div>
+            </div>
+
+            <!-- Voucher scanner card -->
+            <div class="card" style="max-width: 560px;">
+                <p class="form-section-title">
+                    <i data-feather="search" class="w-4 h-4"></i>
+                    Voucher Lookup
+                </p>
+                <label>Voucher Code</label>
+                <div class="flex gap-3 mt-1">
+                    <input id="redeemCode" class="flex-1 font-mono tracking-widest uppercase"
+                        placeholder="e.g. VX-4F7C" style="font-size: 1rem; letter-spacing: 0.12em;" />
+                    <button type="button" id="btnVerifyVoucher" class="btn ghost whitespace-nowrap" onclick="window.verifyVoucher()">
+                        <i data-feather="eye" class="w-4 h-4"></i> Verify
+                    </button>
+                    <button type="button" id="btnRedeemVoucher" class="btn primary whitespace-nowrap" onclick="window.redeemVoucher()">
+                        <i data-feather="check-circle" class="w-4 h-4"></i> Redeem
+                    </button>
+                </div>
+                <div id="partnerResult" class="mt-4 text-sm font-semibold"></div>
+            </div>
+
+            <div>
+                <h3 class="section-heading">
+                    <i data-feather="list" class="w-4 h-4" style="color: var(--text-muted);"></i>
+                    Today's Redemptions
+                </h3>
+                <div id="partnerHistory" class="space-y-3"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <custom-footer></custom-footer>
+
+    <script src="components/navbar.js"></script>
+    <script src="components/footer.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/appointments.js"></script>
+    <script src="js/activities.js"></script>
+    <script src="js/clubs.js"></script>
+    <script src="js/rewards.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        feather.replace();
+    </script>
+    <div id="modalOverlay" class="hidden">
+        <div class="bg-white w-full max-w-lg p-6 rounded-2xl shadow-2xl m-4 relative">
+            <button id="modalCloseBtn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i
+                    data-feather="x"></i></button>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+</body>
+
+</html>
