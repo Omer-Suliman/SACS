@@ -126,8 +126,8 @@ sacs/
 ### 1 — Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/sacs.git
-cd sacs
+git clone https://github.com/Omer-Suliman/SACS.git
+cd SACS
 ```
 
 ### 2 — Install backend dependencies
